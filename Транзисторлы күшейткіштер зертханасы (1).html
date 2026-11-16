@@ -1,0 +1,516 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Транзисторлы күшейткіштер зертханасы</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: sticky tab bar, then stacked cards; the lab card is a two-column bench (schematic | scope). */
+:root{
+  --bg:#f1f5f8; --card:#ffffff; --ink:#13202b; --muted:#566878; --line:#d8e1e8;
+  --accent:#0a7a8c; --accent-ink:#ffffff; --accent-soft:#e0f1f4;
+  --warn:#9a4a05; --warn-soft:#fff1de; --good:#17784a; --paper:#ffffff;
+  --in:#2563eb; --out:#d63a29;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d141a; --card:#151f28; --ink:#e5edf3; --muted:#92a4b3; --line:#27343f;
+    --accent:#4cc3d6; --accent-ink:#06222a; --accent-soft:#12303a;
+    --warn:#f2b35e; --warn-soft:#33260f; --good:#5dd39e; --paper:#151f28;
+    --in:#6aaeff; --out:#ff7a68; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d141a; --card:#151f28; --ink:#e5edf3; --muted:#92a4b3; --line:#27343f;
+  --accent:#4cc3d6; --accent-ink:#06222a; --accent-soft:#12303a;
+  --warn:#f2b35e; --warn-soft:#33260f; --good:#5dd39e; --paper:#151f28;
+  --in:#6aaeff; --out:#ff7a68; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--card)}
+.in{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--card);border-bottom:1px solid var(--line)}
+.top .in{padding-block:14px 12px}
+h1{font-size:clamp(20px,3.2vw,27px);line-height:1.25;font-weight:700;margin:0 0 12px;text-wrap:balance}
+h2{font-size:20px;line-height:1.3;font-weight:700;margin:0 0 12px;text-wrap:balance}
+h3{font-size:15px;font-weight:600;margin:0 0 6px}
+p{margin:0 0 10px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:600 15px var(--sans);padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{padding-block:22px 40px;display:flex;flex-direction:column;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;min-width:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.fact{background:var(--bg);border-radius:10px;padding:12px 14px;min-width:0}
+.fact b{display:block;font-size:17px;margin-bottom:2px}
+.fact span{color:var(--muted);font-size:14px;display:block}
+.fm{font-family:var(--mono);font-size:14.5px;background:var(--accent-soft);padding:2px 7px;border-radius:5px;white-space:nowrap}
+.formulas{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 4px}
+.btn{font:600 15px var(--sans);padding:11px 18px;border-radius:8px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:14px}
+.bar{height:9px;background:var(--line);border-radius:5px;overflow:hidden;margin:14px 0 10px}
+.bar i{display:block;height:100%;width:0;background:var(--good);transition:width .2s linear}
+.concl{font-weight:600;margin:0}
+.scopewrap{margin-top:12px}
+canvas.scope{display:block;width:100%;border-radius:10px;background:#0b1218}
+#demoScope{aspect-ratio:2.4/1}
+#labScope{aspect-ratio:1/1;max-width:520px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.seg button{font:600 14.5px var(--sans);padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);box-shadow:inset 0 -3px 0 var(--accent)}
+.lab{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.lab{grid-template-columns:minmax(0,1fr)}}
+.sch{background:var(--bg);border-radius:10px;padding:8px;border:1px solid var(--line)}
+svg#sch{display:block;width:100%;height:auto}
+svg .w{stroke:var(--ink);stroke-width:2;fill:none;stroke-linecap:round}
+svg .thick{stroke-width:4}
+svg .part{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+svg .fillink{fill:var(--ink)}
+svg .dot{fill:var(--accent)}
+svg .lb{font:11.5px var(--sans);fill:var(--muted)}
+svg .tag{font:700 12.5px var(--sans);fill:var(--accent)}
+.ctl{display:grid;gap:14px;margin-top:14px}
+.row{display:grid;gap:6px}
+.row label,.row .lbl{font-weight:600;font-size:14.5px;display:flex;justify-content:space-between;gap:10px}
+.row .v{font-family:var(--mono);font-weight:700;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+select{font:500 15px var(--sans);padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hint{color:var(--muted);font-size:14px;margin:0}
+.meter{background:#0a1711;color:#7dffb0;border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.meter .big{font:700 clamp(26px,5vw,34px)/1.1 var(--mono);text-align:center;letter-spacing:.01em}
+.meter .sub{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;margin-top:8px;font:500 14px var(--mono);color:#b7f5cf}
+.warn{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:9px 12px;font-size:14.5px;font-weight:500;margin:0 0 12px}
+.tablewrap{overflow-x:auto;margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13.5px;white-space:nowrap}
+td.n,th.n{text-align:right}
+tr.grp td{font-weight:700;background:var(--bg);border-bottom:0}
+.steps{margin:0 0 14px;padding-left:20px}
+.steps li{margin-bottom:4px}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+.res div{background:var(--bg);border-radius:10px;padding:10px 12px}
+.res b{display:block;font:700 18px var(--mono)}
+.res span{font-size:13.5px;color:var(--muted)}
+.dev-ok{color:var(--good)} .dev-bad{color:var(--warn)}
+details{border-top:1px solid var(--line);padding:12px 0}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;font-weight:600}
+details p{margin:8px 0 0;color:var(--muted)}
+.chip{display:inline-block;font-weight:600;font-size:13px;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--ink);vertical-align:middle}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<header class="top"><div class="in">
+  <h1>4.5 жұмыс · Биполярлы транзисторлардағы күшейткіштер</h1>
+  <div class="tabs" role="tablist" aria-label="Бағдарлама">
+    <button class="tab" id="tab-mm" role="tab" aria-selected="true">1-бет · Multisim</button>
+    <button class="tab" id="tab-ew" role="tab" aria-selected="false">2-бет · Воркбенч (EW)</button>
+  </div>
+</div></header>
+
+<main class="in">
+
+<section class="card">
+  <h2>Жұмыстың мақсаты мен қысқаша теориясы</h2>
+  <p>2N2222A транзисторындағы үш күшейткіш сұлбаны (ОЭ, ОК, ОБ) эксперименттік түрде зерттеу: кернеу бойынша күшейту коэффициентін, фазалық ығысуды, кіріс және шығыс кедергілерін анықтау (<span class="chip" data-prog>Multisim</span>).</p>
+  <div class="formulas">
+    <span class="fm">ν_U = U_шығ / U_кір</span>
+    <span class="fm">R_кір = R_қос / (U₁/U₂ − 1)</span>
+    <span class="fm">R_шығ = R_жүк · (U₁/U₂ − 1)</span>
+  </div>
+  <p class="hint">R_қос кіріске тізбектей, R_жүк шығысқа параллель қосылады. U₁ – қосымша резисторсыз шығыс кернеуі, U₂ – резистор қосқаннан кейінгі кернеу.</p>
+  <div class="facts">
+    <div class="fact"><b>ОЭ · ортақ эмиттерлі</b><span>φ = 180°, ν үлкен, R_кір орташа</span></div>
+    <div class="fact"><b>ОК · ортақ коллекторлы</b><span>φ = 0°, ν &lt; 1, R_кір үлкен, R_шығ кіші</span></div>
+    <div class="fact"><b>ОБ · ортақ базалы</b><span>φ = 0°, ν үлкен, R_кір кіші, R_шығ үлкен</span></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>1. Бейне тәжірибе</h2>
+  <button class="btn" id="demoBtn" type="button">▶ Бейнені қосу</button>
+  <div class="bar" aria-hidden="true"><i id="demoBar"></i></div>
+  <p class="hint" id="demoCap">Үш сұлбаның осциллограммасы бір-бірден көрсетіледі. Көк – кіріс, қызыл – шығыс.</p>
+  <canvas class="scope" id="demoScope" aria-label="Демо осциллограф"></canvas>
+  <p class="concl" id="demoConcl" style="margin-top:12px">Қорытынды: бейнені қосқаннан кейін шығады.</p>
+</section>
+
+<section class="card">
+  <h2>2. Виртуалды зертхана (<span data-prog>Multisim</span>)</h2>
+  <div class="seg" id="ckSeg" role="group" aria-label="Сұлба">
+    <button type="button" data-ck="oe" aria-pressed="true">ОЭ</button>
+    <button type="button" data-ck="ok" aria-pressed="false">ОК</button>
+    <button type="button" data-ck="ob" aria-pressed="false">ОБ</button>
+  </div>
+  <div class="lab">
+    <div>
+      <div class="sch"><svg id="sch" viewBox="0 0 600 320" role="img" aria-label="Күшейткіш сұлбасы"></svg></div>
+      <div class="ctl">
+        <div class="row">
+          <label for="uin"><span>Кіріс кернеуі U_кір (A нүктесі)</span><span class="v" id="uinV"></span></label>
+          <input type="range" id="uin" min="0" max="0.4" step="0.001" value="0.172">
+        </div>
+        <div class="two">
+          <div class="row"><label for="rq">R_қос (кіріске тізбектей)</label>
+            <select id="rq"><option value="0">жоқ</option><option value="100">100 Ом</option><option value="220">220 Ом</option><option value="1000">1 кОм</option><option value="10000">10 кОм</option></select></div>
+          <div class="row"><label for="rl">R_жүк (шығысқа параллель)</label>
+            <select id="rl"><option value="0">жоқ</option><option value="100">100 Ом</option><option value="220">220 Ом</option><option value="1000">1 кОм</option><option value="10000">10 кОм</option></select></div>
+        </div>
+        <p class="hint" id="ckHint"></p>
+      </div>
+    </div>
+    <div>
+      <div class="meter">
+        <div class="big" id="mOut">U_шығ = 0 В</div>
+        <div class="sub"><span id="mIn"></span><span id="mNu"></span><span id="mPhi"></span></div>
+      </div>
+      <p class="warn" id="clipWarn" hidden>Шығыс сигнал қиылып жатыр. U_кір мәнін азайтыңыз.</p>
+      <canvas class="scope" id="labScope" aria-label="Осциллограф"></canvas>
+      <div class="three scopewrap">
+        <div class="row"><label for="sMt">мкс/бөл</label><select id="sMt"></select></div>
+        <div class="row"><label for="sVi">U_кір, В/бөл</label><select id="sVi"></select></div>
+        <div class="row"><label for="sVo">U_шығ, В/бөл</label><select id="sVo"></select></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:26px">Өлшеу журналы</h3>
+  <ol class="steps">
+    <li>R_қос пен R_жүк «жоқ» болғанда <b>U₁</b> жазыңыз.</li>
+    <li>R_қос таңдап (R_жүк «жоқ»), <b>U₂</b> жазыңыз: R_кір есептеледі.</li>
+    <li>R_қос «жоқ», R_жүк таңдап, <b>U₂</b> жазыңыз: R_шығ есептеледі.</li>
+  </ol>
+  <p class="warn" id="logMsg" hidden></p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Өлшем</th><th class="n">Мән, В</th><th></th></tr></thead>
+      <tbody id="logBody"></tbody>
+    </table>
+  </div>
+  <div class="res" id="res"></div>
+  <p style="margin-top:14px"><button class="btn ghost sm" id="logClear" type="button">Журналды тазалау</button></p>
+</section>
+
+<section class="card">
+  <h2>3. Multisim мен Воркбенчті салыстыру</h2>
+  <div class="tablewrap"><table id="cmp"></table></div>
+  <p style="margin-top:12px" class="concl">Қорытынды: нәтижелер көбіне 1–5 % ішінде сәйкес келеді. Тек ОК-ның R_кір мәні ≈ 19 % өзгеше: ол U₂ өлшеу дәлдігі мен транзистор моделіне тәуелді. Дәлірек моделі мен көбірек құралы бар Multisim бұл жұмысқа тиімдірек, ал Воркбенч қарапайым сұлбаны жылдам тексеруге ыңғайлы.</p>
+</section>
+
+<section class="card">
+  <h2>4. Бақылау сұрақтары</h2>
+  <details><summary>Қай сұлба кіріс сигналды инверсиялайды?</summary><p>Тек ортақ эмиттерлі (ОЭ): шығыс пен кіріс арасындағы фазалық ығысу 180°. ОК мен ОБ-да φ ≈ 0°.</p></details>
+  <details><summary>ОК сұлбасы қайда қолданылады?</summary><p>Жоғары омды көзді төмен омды жүктемеге келістіру үшін (буфер, эмиттерлік қайталағыш): R_кір үлкен, R_шығ кіші, ν ≈ 1.</p></details>
+  <details><summary>ОБ мен ОЭ сұлбаларының айырмашылығы неде?</summary><p>ОБ-да φ = 0°, кіріс кедергісі аз, шығыс кедергісі көп, ток бойынша күшейтпейді; ОЭ-да φ = 180°, кіріс кедергісі орташа.</p></details>
+  <details><summary>ОБ сұлбасында U_кір неге A нүктесінде өлшенеді?</summary><p>Эмиттер кірісінің кедергісі аз (≈ 270 Ом), сондықтан генератор кернеуі 1 кОм / 100 Ом бөлгіште түседі. Транзисторға түсетін нақты кернеу – 100 Ом резистордағы кернеу, яғни A нүктесі. Генератор шығысында өлшеу ν-ді дұрыс бермейді.</p></details>
+</section>
+
+</main>
+
+<script>
+(function(){
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var fmt=function(n,d){return Number(n).toFixed(d==null?2:d).replace('.',',')};
+var fR=function(r){return r>=1000?(r/1000)+' кОм':r+' Ом'};
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Өлшенген мәндер: ν_U, R_кір (Ом), R_шығ (Ом)
+var DATA={
+  mm:{oe:{nu:27.81,rin:2383,rout:333},ok:{nu:0.943,rin:6171,rout:93},ob:{nu:18.05,rin:273,rout:15925}},
+  ew:{oe:{nu:27.36,rin:2321,rout:335},ok:{nu:0.95,rin:7657,rout:91},ob:{nu:18.94,rin:280,rout:15760}}
+};
+var NAMES={mm:'Multisim',ew:'Воркбенч (EW)'};
+var CK={
+  oe:{name:'ОЭ',f:1000,phi:180,uin:0.172,max:0.4,step:0.001,sc:{mt:250,vi:0.1,vo:2},clip:8,hint:'Жұмыс бойынша: R_қос = 1 кОм, R_жүк = 1 кОм. Генератор 1 кГц.'},
+  ok:{name:'ОК',f:1000,phi:0,uin:3,max:5,step:0.01,sc:{mt:250,vi:1,vo:1},clip:8,hint:'Жұмыс бойынша: R_қос = 10 кОм, R_жүк = 100 Ом. Генератор 1 кГц.'},
+  ob:{name:'ОБ',f:10000,phi:0,uin:0.3,max:0.6,step:0.001,sc:{mt:20,vi:0.1,vo:5},clip:14,hint:'Жұмыс бойынша: R_қос = 220 Ом, R_жүк = 1 кОм. Генератор 10 кГц, шығыс қанығудан бұрмаланады.'}
+};
+var OPT={mt:[10,20,50,100,250,500],vi:[0.05,0.1,0.2,0.5,1,2,5],vo:[0.5,1,2,5,10]};
+
+var state={prog:'mm',ckt:'oe',uin:0.172,rq:0,rl:0,sc:{mt:250,vi:0.1,vo:2},log:{}};
+
+// ОБ шығыс пішіні: бір период ішінде орташасы алынған, rms = 1
+var OBN=(function(){
+  var N=4096,m=0,q=0,i,d;
+  for(i=0;i<N;i++)m+=Math.exp(2*Math.sin(2*Math.PI*i/N));
+  m/=N;
+  for(i=0;i<N;i++){d=Math.exp(2*Math.sin(2*Math.PI*i/N))-m;q+=d*d;}
+  var s=Math.sqrt(q/N);
+  return function(th){return (Math.exp(2*Math.sin(th))-m)/s;};
+})();
+function shape(ck,th){return ck==='ob'?OBN(th):Math.SQRT2*Math.sin(th+(ck==='oe'?Math.PI:0));}
+
+function calc(ck,prog,uin,rq,rl){
+  var d=DATA[prog][ck],L=CK[ck].clip,g=d.nu;
+  if(rq)g/=1+rq/d.rin;
+  if(rl)g/=1+d.rout/rl;
+  var N=720,a=0,pk=0,i,v,c;
+  for(i=0;i<N;i++){
+    v=uin*g*shape(ck,2*Math.PI*(i+0.5)/N);
+    pk=Math.max(pk,Math.abs(v));
+    c=Math.max(-L,Math.min(L,v));
+    a+=c*c;
+  }
+  return {g:g,uo:Math.sqrt(a/N),clipped:pk>L};
+}
+function cur(){return calc(state.ckt,state.prog,state.uin,state.rq,state.rl);}
+
+/* ---------- Осциллограф ---------- */
+function drawScope(cv,ck,uin,g,sc,shift){
+  var cfg=CK[ck],dpr=Math.min(window.devicePixelRatio||1,2);
+  var w=cv.clientWidth,h=cv.clientHeight;
+  if(!w||!h)return;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  var x=cv.getContext('2d');
+  x.setTransform(dpr,0,0,dpr,0,0);
+  x.fillStyle='#0b1218';x.fillRect(0,0,w,h);
+  var i,p;
+  for(i=0;i<=10;i++){
+    x.strokeStyle=i===5?'rgba(170,200,220,.55)':'rgba(170,200,220,.2)';
+    x.lineWidth=1;
+    p=Math.round(i*w/10)+.5;x.beginPath();x.moveTo(p,0);x.lineTo(p,h);x.stroke();
+    p=Math.round(i*h/10)+.5;x.beginPath();x.moveTo(0,p);x.lineTo(w,p);x.stroke();
+  }
+  x.strokeStyle='rgba(170,200,220,.55)';
+  for(i=0;i<50;i++){
+    p=i*w/50;x.beginPath();x.moveTo(p,h/2-3);x.lineTo(p,h/2+3);x.stroke();
+    p=i*h/50;x.beginPath();x.moveTo(w/2-3,p);x.lineTo(w/2+3,p);x.stroke();
+  }
+  var N=700,L=cfg.clip,mt=sc.mt*1e-6,k,t,th,vin,vout,X,Y;
+  function trace(color,fn,div){
+    x.strokeStyle=color;x.lineWidth=2;x.lineJoin='round';x.beginPath();
+    for(k=0;k<=N;k++){
+      t=(k/N)*10*mt+(shift||0);th=2*Math.PI*cfg.f*t;
+      X=k/N*w;Y=h/2-fn(th)/div*(h/10);
+      if(k===0)x.moveTo(X,Y);else x.lineTo(X,Y);
+    }
+    x.stroke();
+  }
+  trace(getComputedStyle(document.documentElement).getPropertyValue('--in').trim()||'#6aaeff',function(th){return Math.SQRT2*uin*Math.sin(th);},sc.vi);
+  trace(getComputedStyle(document.documentElement).getPropertyValue('--out').trim()||'#ff7a68',function(th){return Math.max(-L,Math.min(L,uin*g*shape(ck,th)));},sc.vo);
+  x.font='500 11.5px JetBrains Mono, monospace';x.textBaseline='top';
+  x.fillStyle='#8fb6ff';x.fillText('U_кір '+String(sc.vi).replace('.',',')+' В/бөл',8,6);
+  x.fillStyle='#ff9a8a';x.fillText('U_шығ '+String(sc.vo).replace('.',',')+' В/бөл',8,21);
+  x.fillStyle='#b9c7d3';x.fillText(sc.mt+' мкс/бөл',8,36);
+}
+
+/* ---------- Сұлба ---------- */
+var W=function(a,b,c,d){return '<line class="w" x1="'+a+'" y1="'+b+'" x2="'+c+'" y2="'+d+'"/>';};
+var T=function(x,y,t,cls,anc){return '<text class="'+(cls||'lb')+'" x="'+x+'" y="'+y+'" text-anchor="'+(anc||'start')+'">'+t+'</text>';};
+var DOT=function(x,y){return '<circle class="dot" cx="'+x+'" cy="'+y+'" r="3.5"/>';};
+var RH=function(cx,cy,t){return '<rect class="part" x="'+(cx-22)+'" y="'+(cy-7)+'" width="44" height="14" rx="1"/>'+T(cx,cy-12,t,'lb','middle');};
+var RV=function(cx,cy,t,left){return '<rect class="part" x="'+(cx-7)+'" y="'+(cy-20)+'" width="14" height="40" rx="1"/>'+(left?T(cx-12,cy+4,t,'lb','end'):T(cx+12,cy+4,t));};
+var CH=function(cx,cy,t){return W(cx-5,cy-12,cx-5,cy+12)+W(cx+5,cy-12,cx+5,cy+12)+T(cx,cy-18,t,'lb','middle');};
+var CV=function(cx,cy,t){return W(cx-12,cy-5,cx+12,cy-5)+W(cx-12,cy+5,cx+12,cy+5)+T(cx+16,cy+4,t);};
+var GND=function(x,y){return W(x,y,x,y+6)+W(x-10,y+6,x+10,y+6)+W(x-6,y+11,x+6,y+11)+W(x-2,y+16,x+2,y+16);};
+var GEN=function(x,y,t){return '<circle class="part" cx="'+x+'" cy="'+y+'" r="16"/><path class="w" d="M'+(x-9)+' '+y+' q4.5 -9 9 0 t9 0"/>'+T(x+22,y+4,t);};
+
+function svgMarkup(){
+  var ck=state.ckt,rq=state.rq,rl=state.rl,s='',ty=ck==='ok'?215:110;
+  // транзистор
+  s+='<line class="w thick" x1="360" y1="148" x2="360" y2="192"/>'+W(360,160,400,130)+W(360,180,400,210)+
+     '<polygon class="fillink" points="394,205.5 383.6,202.7 388.4,196.3"/>'+T(414,175,'Q · 2N2222A');
+  // қорек
+  if(ck==='ob'){s+=W(380,30,480,30);}else{s+=W(290,30,480,30);}
+  s+=T(486,34,'+15 В');
+  // коллектор
+  if(ck==='ok'){s+=W(400,30,400,130);}
+  else{s+=W(400,30,400,50)+RV(400,70,ck==='ob'?'22 кОм':'330 Ом')+W(400,90,400,130);}
+  // шығыс
+  s+=W(400,ty,450,ty)+CH(455,ty,ck==='oe'?'0,47 мкФ':'1 мкФ')+W(460,ty,530,ty)+DOT(510,ty)+T(536,ty+4,'U_шығ','tag');
+  if(rl){s+=W(510,ty,510,ty+24)+RV(510,ty+44,fR(rl))+W(510,ty+64,510,ty+78)+GND(510,ty+78);}
+  s+=DOT(400,ty);
+  if(ck==='oe'||ck==='ok'){
+    // база: Rb
+    s+=W(300,30,300,70)+RV(300,90,ck==='oe'?'100 кОм':'10 кОм',true)+W(300,110,300,170)+W(300,170,360,170)+DOT(300,170);
+    // эмиттер
+    s+=W(400,210,400,225)+RV(400,245,'10 Ом'.replace('10 Ом',ck==='oe'?'10 Ом':'220 Ом'))+W(400,265,400,279)+GND(400,279);
+  }
+  if(ck==='oe'){
+    s+=GEN(40,225,'1 кГц')+W(40,209,40,170)+W(40,170,60,170)+RH(82,170,'1 кОм')+W(104,170,150,170)+DOT(150,170)+T(150,136,'A · U_кір','tag','middle');
+    s+=W(150,170,150,195)+RV(150,215,'100 Ом')+W(150,235,150,255)+GND(150,255)+W(40,241,40,255)+GND(40,255);
+    if(rq){s+=W(150,170,172,170)+RH(194,170,fR(rq))+W(216,170,257,170);}else{s+=W(150,170,257,170);}
+    s+=CH(262,170,'1 мкФ')+W(267,170,300,170);
+  }
+  if(ck==='ok'){
+    s+=W(330,30,330,100)+CV(330,105,'0,01 мкФ')+W(330,110,330,170)+DOT(330,170);
+    s+=GEN(40,225,'1 кГц')+W(40,209,40,170)+W(40,241,40,255)+GND(40,255)+W(40,170,80,170)+DOT(80,170)+T(80,136,'A · U_кір','tag','middle');
+    if(rq){s+=W(80,170,98,170)+RH(120,170,fR(rq))+W(142,170,257,170);}else{s+=W(80,170,257,170);}
+    s+=CH(262,170,'0,22 мкФ')+W(267,170,300,170);
+  }
+  if(ck==='ob'){
+    s+=W(360,170,330,170)+W(330,170,330,188)+GND(330,188);
+    s+=W(400,210,400,225)+RV(400,245,'4,7 кОм')+W(400,265,400,285)+W(385,285,415,285)+T(421,289,'−15 В')+DOT(400,215);
+    s+=GEN(40,260,'10 кГц')+W(40,244,40,215)+W(40,215,60,215)+RH(82,215,'1 кОм')+W(104,215,150,215)+DOT(150,215)+T(150,182,'A · U_кір','tag','middle');
+    s+=W(150,215,150,235)+RV(150,255,'100 Ом')+W(150,275,150,285)+GND(150,285)+W(40,276,40,285)+GND(40,285);
+    if(rq){s+=W(150,215,172,215)+RH(194,215,fR(rq))+W(216,215,257,215);}else{s+=W(150,215,257,215);}
+    s+=CH(262,215,'10 мкФ')+W(267,215,400,215);
+  }
+  return s;
+}
+
+/* ---------- Көрсету ---------- */
+function renderSvg(){$('#sch').innerHTML=svgMarkup();}
+function renderMeter(){
+  var c=cur(),cfg=CK[state.ckt];
+  $('#mOut').textContent='U_шығ = '+fmt(c.uo,3)+' В';
+  $('#mIn').textContent='U_кір = '+fmt(state.uin,3)+' В';
+  $('#mNu').textContent='ν_U = '+fmt(state.uin>0?c.uo/state.uin:0,2);
+  $('#mPhi').textContent='φ = '+cfg.phi+'°';
+  $('#clipWarn').hidden=!c.clipped;
+  $('#uinV').textContent=fmt(state.uin,state.ckt==='ok'?2:3)+' В';
+}
+function renderLabScope(){
+  var c=cur();
+  drawScope($('#labScope'),state.ckt,state.uin,c.g,state.sc,0);
+}
+function renderLog(){
+  var L=state.log,rows=[
+    ['U₁ (қосымшасыз)',L.u1],
+    ['U₂ (R_қос = '+(L.rqv?fR(L.rqv):'—')+')',L.u2a],
+    ['U₂ (R_жүк = '+(L.rlv?fR(L.rlv):'—')+')',L.u2n]
+  ],keys=['u1','u2a','u2n'],h='';
+  rows.forEach(function(r,i){
+    h+='<tr><td>'+r[0]+'</td><td class="n">'+(r[1]==null?'—':fmt(r[1],3))+'</td><td class="n"><button type="button" class="btn ghost sm" data-log="'+keys[i]+'">Жазу</button></td></tr>';
+  });
+  $('#logBody').innerHTML=h;
+  var ref=DATA[state.prog][state.ckt],out='';
+  function dev(v,r){var d=(v-r)/r*100;if(Math.abs(d)<0.05)d=0;return '<span class="'+(Math.abs(d)<=10?'dev-ok':'dev-bad')+'">'+(d>0?'+':'')+fmt(d,1)+' %</span>';}
+  if(L.u1!=null&&L.uin1>0){
+    out+='<div><b>'+fmt(L.u1/L.uin1,2)+'</b><span>ν_U = U₁ / U_кір · бағдарлама: '+fmt(ref.nu,2)+'</span></div>';
+  }
+  if(L.u1!=null&&L.u2a!=null){
+    var q=L.u1/L.u2a-1;
+    out+='<div><b>'+(q>1e-6?fmt(L.rqv/q,0)+' Ом':'—')+'</b><span>R_кір = '+fR(L.rqv)+' / ('+fmt(L.u1,3)+'/'+fmt(L.u2a,3)+' − 1)'+(q>1e-6?' · '+dev(L.rqv/q,ref.rin):'')+'</span></div>';
+  }
+  if(L.u1!=null&&L.u2n!=null){
+    var q2=L.u1/L.u2n-1;
+    out+='<div><b>'+fmt(L.rlv*q2,0)+' Ом</b><span>R_шығ = '+fR(L.rlv)+' · ('+fmt(L.u1,3)+'/'+fmt(L.u2n,3)+' − 1) · '+dev(L.rlv*q2,ref.rout)+'</span></div>';
+  }
+  $('#res').innerHTML=out;
+}
+function msg(t){var m=$('#logMsg');if(t){m.textContent=t;m.hidden=false;}else m.hidden=true;}
+function doLog(kind){
+  var u=cur().uo,L=state.log;
+  if(kind==='u1'){
+    if(state.rq||state.rl){return msg('U₁ өлшеу үшін R_қос пен R_жүк «жоқ» болуы керек.');}
+    L.u1=u;L.uin1=state.uin;
+  }else if(kind==='u2a'){
+    if(!state.rq||state.rl){return msg('R_қос таңдаңыз, R_жүк «жоқ» болсын.');}
+    if(L.u1==null){return msg('Алдымен U₁ жазыңыз.');}
+    if(Math.abs(L.uin1-state.uin)>1e-9){return msg('U_кір өзгерген. U₁ мен U₂ бірдей U_кір-де өлшенуі керек.');}
+    L.u2a=u;L.rqv=state.rq;
+  }else{
+    if(!state.rl||state.rq){return msg('R_жүк таңдаңыз, R_қос «жоқ» болсын.');}
+    if(L.u1==null){return msg('Алдымен U₁ жазыңыз.');}
+    if(Math.abs(L.uin1-state.uin)>1e-9){return msg('U_кір өзгерген. U₁ мен U₂ бірдей U_кір-де өлшенуі керек.');}
+    L.u2n=u;L.rlv=state.rl;
+  }
+  msg('');renderLog();
+}
+function renderCmp(){
+  var h='<thead><tr><th>Сұлба</th><th>Шама</th><th class="n">Multisim</th><th class="n">Воркбенч</th><th class="n">Айырмашылық</th></tr></thead><tbody>',
+      q=[['nu','ν_U',2],['rin','R_кір, Ом',0],['rout','R_шығ, Ом',0]];
+  ['oe','ok','ob'].forEach(function(ck){
+    q.forEach(function(r,i){
+      var a=DATA.mm[ck][r[0]],b=DATA.ew[ck][r[0]],d=Math.abs(a-b)/b*100;
+      h+='<tr><td>'+(i===0?'<b>'+CK[ck].name+'</b>':'')+'</td><td>'+r[1]+'</td><td class="n">'+fmt(a,r[2])+'</td><td class="n">'+fmt(b,r[2])+'</td><td class="n '+(d>10?'dev-bad':'')+'">'+fmt(d,1)+' %</td></tr>';
+    });
+  });
+  $('#cmp').innerHTML=h+'</tbody>';
+}
+function fillSel(id,arr,val,unit){
+  var s=$(id),h='';
+  arr.forEach(function(v){h+='<option value="'+v+'"'+(v===val?' selected':'')+'>'+String(v).replace('.',',')+'</option>';});
+  s.innerHTML=h;
+}
+function syncScopeSel(){
+  fillSel('#sMt',OPT.mt,state.sc.mt);fillSel('#sVi',OPT.vi,state.sc.vi);fillSel('#sVo',OPT.vo,state.sc.vo);
+}
+function renderAll(){
+  $$('[data-prog]').forEach(function(e){e.textContent=NAMES[state.prog];});
+  $$('.tab').forEach(function(b){b.setAttribute('aria-selected',b.id==='tab-'+state.prog?'true':'false');});
+  $$('#ckSeg button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.ck===state.ckt?'true':'false');});
+  $('#ckHint').textContent=CK[state.ckt].hint;
+  renderSvg();renderMeter();renderLabScope();renderLog();
+}
+function setCkt(ck){
+  var c=CK[ck];
+  state.ckt=ck;state.uin=c.uin;state.rq=0;state.rl=0;state.sc={mt:c.sc.mt,vi:c.sc.vi,vo:c.sc.vo};state.log={};msg('');
+  var r=$('#uin');r.max=c.max;r.step=c.step;r.value=c.uin;
+  $('#rq').value='0';$('#rl').value='0';
+  syncScopeSel();renderAll();
+}
+function setProg(p){
+  state.prog=p;state.log={};msg('');
+  renderAll();idleDemo();
+}
+
+/* ---------- Демо ---------- */
+var PH=[
+  {ck:'oe',title:'ОЭ күшейткіші',text:'Шығыс сигнал кіріске қарсы фазада (φ = 180°), кернеу шамамен 28 есе күшейеді.'},
+  {ck:'ok',title:'ОК күшейткіші (эмиттерлік қайталағыш)',text:'Шығыс сигнал кірісті қайталайды (φ = 0°), ν < 1.'},
+  {ck:'ob',title:'ОБ күшейткіші',text:'Фаза өзгермейді (φ = 0°), кернеу шамамен 18 есе күшейеді, шығыс қанығудан бұрмаланады.'}
+];
+var demo={on:false,t0:0,raf:0,DUR:6};
+function demoDraw(i,shift){
+  var ph=PH[i],cfg=CK[ph.ck],c=calc(ph.ck,state.prog,cfg.uin,0,0);
+  drawScope($('#demoScope'),ph.ck,cfg.uin,c.g,cfg.sc,shift);
+}
+function idleDemo(){
+  if(demo.on)return;
+  demoDraw(0,0);
+}
+function demoFrame(now){
+  if(!demo.on)return;
+  var el=(now-demo.t0)/1000,total=demo.DUR*PH.length;
+  if(el>=total){stopDemo(true);return;}
+  var i=Math.floor(el/demo.DUR),ph=PH[i],T=1/CK[ph.ck].f;
+  demoDraw(i,reduce?0:el*T*0.4);
+  $('#demoBar').style.width=(el/total*100)+'%';
+  $('#demoCap').textContent=(i+1)+'/'+PH.length+' · '+ph.title+'. '+ph.text;
+  demo.raf=requestAnimationFrame(demoFrame);
+}
+function stopDemo(done){
+  demo.on=false;cancelAnimationFrame(demo.raf);
+  $('#demoBtn').textContent='▶ Бейнені қосу';
+  if(done){
+    $('#demoBar').style.width='100%';
+    $('#demoCap').textContent='Бейне аяқталды.';
+    $('#demoConcl').textContent='Қорытынды: ОЭ сигналды күшейтіп, фазасын 180°-қа өзгертеді; ОК кернеуді күшейтпейді; ОБ күшейтеді, фазасы өзгермейді. Енді өзіңіз орындаңыз!';
+  }
+}
+function startDemo(){
+  demo.on=true;demo.t0=performance.now();
+  $('#demoBtn').textContent='■ Тоқтату';
+  $('#demoConcl').textContent='Қорытынды: бейне аяқталғаннан кейін шығады.';
+  demo.raf=requestAnimationFrame(demoFrame);
+}
+
+/* ---------- Оқиғалар ---------- */
+$('#tab-mm').addEventListener('click',function(){setProg('mm');});
+$('#tab-ew').addEventListener('click',function(){setProg('ew');});
+$('#ckSeg').addEventListener('click',function(e){var b=e.target.closest('button[data-ck]');if(b)setCkt(b.dataset.ck);});
+$('#uin').addEventListener('input',function(e){state.uin=parseFloat(e.target.value);renderMeter();renderLabScope();});
+$('#rq').addEventListener('change',function(e){state.rq=parseFloat(e.target.value);renderSvg();renderMeter();renderLabScope();});
+$('#rl').addEventListener('change',function(e){state.rl=parseFloat(e.target.value);renderSvg();renderMeter();renderLabScope();});
+['Mt','Vi','Vo'].forEach(function(k){
+  $('#s'+k).addEventListener('change',function(e){state.sc[k.toLowerCase()]=parseFloat(e.target.value);renderLabScope();});
+});
+$('#logBody').addEventListener('click',function(e){var b=e.target.closest('button[data-log]');if(b)doLog(b.dataset.log);});
+$('#logClear').addEventListener('click',function(){state.log={};msg('');renderLog();});
+$('#demoBtn').addEventListener('click',function(){if(demo.on)stopDemo(false);else startDemo();});
+window.addEventListener('resize',function(){renderLabScope();if(!demo.on)idleDemo();});
+
+renderCmp();setCkt('oe');idleDemo();
+})();
+</script>
+
+</body></html>
